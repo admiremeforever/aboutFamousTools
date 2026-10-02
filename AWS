@@ -1,0 +1,672 @@
+AWS IAM : - 
+
+1) What is IAM?
+→ AWS service for authentication and authorization.
+
+2) What is an IAM Role?
+→ An identity with permissions that can be assumed by users,
+  AWS services or applications.
+
+3) What is an IAM Policy?
+→ JSON document defining Allow/Deny permissions.
+
+4) IAM User vs IAM Role?
+→ User → identity generally associated with a person.
+→ Role → assumable identity providing temporary credentials.
+
+5) What is Principle of Least Privilege?
+→ Give only the minimum permissions required.
+
+6) Why prefer IAM Roles over access keys?
+→ Roles provide temporary credentials and avoid storing
+  long-lived AWS access keys.
+
+Production Problems:
+→ AccessDenied → role/policy doesn't have required permission.
+→ Incorrect/over-permissive policy → security risk or unintended access.
+
+
+AWS EC2 
+
+
+1) What is AWS EC2?
+→ EC2 provides resizable virtual servers in AWS to run applications.
+
+2) What is an AMI?
+→ Amazon Machine Image; template containing OS, software and configuration
+  used to launch EC2 instances.
+
+3) What is a Security Group?
+→ Virtual firewall attached to an EC2 instance.
+→ Controls inbound/outbound traffic.
+→ Stateful.
+
+4) Security Group vs Network ACL?
+→ Security Group → instance level, stateful.
+→ NACL → subnet level, stateless.
+
+5) What is EBS?
+→ Persistent block storage attached to EC2.
+→ Data can survive instance stop/restart.
+
+6) EC2 Stop vs Terminate?
+→ Stop → instance can be started again.
+→ Terminate → instance is deleted.
+
+7) What is Auto Scaling Group?
+→ Maintains desired number of EC2 instances.
+→ Can add/remove instances based on demand or health.
+
+8) What is Load Balancer?
+→ Distributes incoming traffic across multiple EC2 instances.
+→ Provides scalability and high availability.
+
+9) Public vs Private EC2?
+→ Public → reachable through internet via appropriate networking.
+→ Private → no direct inbound internet access.
+
+Production Problems:
+→ High CPU/Memory → application becomes slow or instance crashes.
+→ EBS/Disk full → logs/data fill disk and application starts failing.
+
+
+
+AWS LAMBDA 
+
+1) What is AWS Lambda?
+→ Serverless compute service that runs code without managing servers.
+
+2) What can trigger Lambda?
+→ API Gateway, S3, EventBridge, SQS, SNS, Kafka/MSK, etc.
+
+3) What is Lambda Execution Role?
+→ IAM Role defining what AWS resources the Lambda can access.
+
+4) What is Lambda Cold Start?
+→ Additional startup latency when AWS creates a new execution environment.
+
+5) What is Lambda Concurrency?
+→ Number of Lambda executions running simultaneously.
+
+6) How does Lambda handle retries?
+→ Depends on invocation type/event source.
+→ Asynchronous invocations can be retried automatically.
+→ Event-source integrations have their own retry/offset behavior.
+
+7) Synchronous vs Asynchronous invocation?
+→ Synchronous → caller waits for response.
+→ Asynchronous → event is queued and processed later.
+
+Production Problems:
+→ Cold Start → increased latency after idle periods/scaling.
+→ Timeout/Throttling → long execution or concurrency limits cause failures.
+
+
+AMAZON EKS 
+
+1) What is Amazon EKS?
+→ AWS managed Kubernetes service.
+
+2) Kubernetes vs EKS?
+→ Kubernetes → container orchestration platform.
+→ EKS → AWS-managed Kubernetes service.
+
+3) What is Kubernetes Control Plane?
+→ Manages the cluster and makes scheduling/orchestration decisions.
+
+4) What is a Worker Node?
+→ Machine/EC2 instance that runs Kubernetes Pods.
+
+5) What is a Pod?
+→ Smallest deployable Kubernetes unit.
+→ Contains one or more containers.
+
+6) What is a Deployment?
+→ Manages Pods and maintains the desired number/version of replicas.
+
+7) What is a Service?
+→ Provides a stable network endpoint to access Pods.
+
+8) What is an Ingress?
+→ Defines HTTP/HTTPS routing rules to expose Kubernetes services.
+
+9) What happens when a Pod crashes?
+→ Kubernetes recreates the Pod if the desired replica count is not met.
+
+10) What happens when a Worker Node goes down?
+→ Pods on that node become unavailable.
+→ Kubernetes schedules replacement Pods on healthy nodes if possible.
+
+Production Problems:
+→ CrashLoopBackOff/OOMKilled → application/config/memory problem.
+→ ImagePullBackOff → Kubernetes cannot pull the container image.
+
+
+
+
+From Resume 
+
+
+
+AWS – EC2 + EKS INTERVIEW NOTES
+================================
+
+EC2 + APM
+---------
+
+1. How would you deploy APM on EC2?
+- Launch EC2 using suitable AMI.
+- Install/configure APM and dependencies.
+- Configure Security Group.
+- Attach EBS for storage/logs.
+- Configure IAM Role if AWS access is required.
+- Use Load Balancer + multiple EC2s for HA.
+
+2. How would you expose APM running on EC2?
+Internet
+   ↓
+Load Balancer
+   ↓
+EC2
+   ↓
+APM
+
+- Load Balancer handles incoming traffic.
+- Security Group allows required ports.
+- EC2 can remain private.
+
+3. What if APM gets high traffic?
+- Use multiple EC2 instances.
+- Put them behind Load Balancer.
+- Configure Auto Scaling Group.
+- Scale based on CPU/traffic/application metrics.
+
+4. What if EC2 running APM goes down?
+- Single EC2 → APM unavailable.
+- For HA:
+  - Multiple EC2 instances.
+  - Different Availability Zones.
+  - Load Balancer health checks.
+  - Auto Scaling Group replaces unhealthy instances.
+
+5. How would you monitor EC2?
+- CPU
+- Memory
+- Disk usage
+- Disk I/O
+- Network
+- Instance health
+- Application logs
+- Use CloudWatch + application monitoring.
+
+6. APM is slow. How do you troubleshoot?
+- Check application first.
+- Check CPU.
+- Check memory/GC.
+- Check disk space/I/O.
+- Check network latency.
+- Check DB latency.
+- Check external dependencies.
+- Check application logs.
+
+7. How would you secure APM traffic?
+- HTTPS/TLS.
+- Security Groups.
+- Keep EC2 private where possible.
+- Public Load Balancer → Private EC2.
+- IAM Roles instead of hardcoded AWS keys.
+- Least-privilege access.
+
+8. How does EC2 APM access PostgreSQL/Oracle?
+EC2
+ ↓
+VPC/Network
+ ↓
+Database
+
+- DB Security Group allows traffic from application Security Group.
+- Configure correct DB port.
+- Ensure routing/subnet connectivity.
+- Store credentials in Secrets Manager/Parameter Store.
+
+
+EKS + SYNC-SERVICE
+------------------
+
+9. How would you deploy Sync-Service on EKS?
+
+Docker Image
+    ↓
+Container Registry
+    ↓
+EKS Deployment
+    ↓
+Pods
+
+Deployment defines:
+- Container image
+- Replicas
+- CPU/memory requests & limits
+- Environment/config
+- Health probes
+
+10. Explain Internet → EKS application flow.
+
+Internet
+   ↓
+Ingress / Load Balancer
+   ↓
+Kubernetes Service
+   ↓
+Pod
+   ↓
+Sync-Service
+
+- Ingress → HTTP/HTTPS routing.
+- Service → stable networking endpoint.
+- Service selects Pods using labels.
+
+11. What happens if Sync-Service Pod crashes?
+Example:
+
+Desired replicas = 3
+
+P1 → Running
+P2 → Running
+P3 → Crashed
+
+Kubernetes creates replacement Pod.
+
+P1 → Running
+P2 → Running
+P3 → New Pod
+
+Deployment/ReplicaSet maintains desired replicas.
+
+12. Why run 3 replicas?
+- High availability.
+- Load distribution.
+- Failure tolerance.
+- Rolling deployments.
+
+Service
+ / | \
+P1 P2 P3
+
+If P1 fails → P2/P3 continue serving.
+
+13. How would you expose Sync-Service internally?
+
+Sync-Service
+    ↓
+ClusterIP Service
+    ↓
+Pods
+
+- ClusterIP is accessible inside the cluster.
+- No direct public access.
+
+14. How would you expose Sync-Service externally?
+
+Internet
+   ↓
+AWS Load Balancer
+   ↓
+Ingress
+   ↓
+Service
+   ↓
+Pods
+
+15. How do you achieve zero-downtime deployment?
+- Multiple replicas.
+- RollingUpdate strategy.
+- Readiness probe.
+- Proper maxUnavailable/maxSurge.
+
+Example:
+
+Old:
+P1 P2 P3
+
+Deploy new version:
+P1 P2 P3
+ ↓
+New Pod becomes Ready
+ ↓
+Old Pod terminated
+ ↓
+Repeat
+
+
+16. Sync-Service Pod is OOMKilled. How troubleshoot?
+Check:
+- Memory limit.
+- Actual memory usage.
+- JVM heap.
+- Memory leak.
+- Large requests/responses.
+- Cache size.
+- Thread count.
+- GC behavior.
+
+Example:
+
+Container limit = 512 MB
+Application uses = 800 MB
+
+→ OOMKilled
+
+Fix:
+- Increase limit if justified.
+- Find and fix excessive memory consumption.
+
+17. Pod is Pending. Why?
+Common reasons:
+- Insufficient CPU/memory.
+- Resource requests too high.
+- No suitable node.
+- Taints/tolerations mismatch.
+- Node affinity issues.
+- PVC/storage issue.
+
+Command:
+
+kubectl describe pod <pod-name>
+
+Check Events section.
+
+18. Pod is Running but application unreachable. What check?
+
+Pod
+ ↓
+Container
+ ↓
+Service
+ ↓
+Ingress
+ ↓
+Load Balancer
+
+Check:
+- Application listening on correct port?
+- Container port?
+- Service targetPort?
+- Service selector?
+- Endpoints?
+- Ingress configuration?
+- Security Group?
+- Network Policy?
+- Readiness probe?
+
+Commands:
+
+kubectl get pods
+kubectl get svc
+kubectl get endpoints
+kubectl describe ingress
+
+
+19. How configure CPU/memory requests and limits?
+
+resources:
+  requests:
+    cpu: "500m"
+    memory: "512Mi"
+  limits:
+    cpu: "1"
+    memory: "1Gi"
+
+Request:
+- Used by Kubernetes for scheduling.
+
+Limit:
+- Maximum resource container can consume.
+
+
+20. How would you auto-scale Sync-Service?
+
+Pod scaling:
+Traffic/CPU increases
+        ↓
+HPA
+        ↓
+More Pods
+
+Node scaling:
+More Pods require capacity
+        ↓
+Cluster Autoscaler/Karpenter
+        ↓
+More worker nodes
+
+
+IAM + AWS SERVICES
+------------------
+
+21. How does Sync-Service access AWS services securely?
+- Use IAM-based workload identity.
+- EKS Pod Identity / IRSA.
+- Assign required IAM permissions to workload.
+- Avoid hardcoded AWS credentials.
+
+Sync-Service Pod
+       ↓
+IAM Role
+       ↓
+AWS S3 / DynamoDB / Secrets Manager
+
+
+22. Why shouldn't AWS access keys be put inside Pods?
+Long-lived credentials can leak through:
+- Git
+- Docker image
+- Logs
+- Kubernetes YAML
+- Developer machines
+
+Use temporary credentials through workload identity.
+
+23. Sync-Service only needs S3 read access. What permissions?
+- Grant only required S3 read permissions.
+- Restrict to required bucket/object.
+
+Follow Least Privilege.
+
+Don't give AdministratorAccess.
+
+24. Sync-Service gets AccessDenied. How troubleshoot?
+
+Pod Identity
+    ↓
+IAM Role
+    ↓
+IAM Policy
+    ↓
+Resource ARN
+    ↓
+Resource Policy
+    ↓
+Explicit Deny
+
+Check:
+- Correct IAM role?
+- Required permission?
+- Correct resource ARN?
+- Explicit Deny?
+- Correct account/region?
+
+
+PRODUCTION SCENARIOS
+--------------------
+
+25. EC2 is healthy but users cannot access APM.
+
+Check:
+
+User
+ ↓
+DNS
+ ↓
+Load Balancer
+ ↓
+Security Group
+ ↓
+EC2
+ ↓
+APM
+
+Check:
+- DNS resolution.
+- Load Balancer health.
+- Target group.
+- Listener.
+- Security Group.
+- EC2 port.
+- APM process.
+- Application logs.
+
+
+26. Sync-Service latency suddenly increases.
+
+Check:
+
+Ingress
+  ↓
+Service
+  ↓
+Pod
+  ↓
+Sync-Service
+  ↓
+Redis / DB / Kafka / External APIs
+
+Check:
+- CPU/memory.
+- Pod count.
+- GC.
+- Thread pools.
+- DB latency.
+- Redis latency.
+- Kafka lag.
+- External API latency.
+- Network latency.
+- Recent deployment/config changes.
+
+Determine whether bottleneck is:
+- Application
+- Dependency
+- Infrastructure
+
+
+27. Sync-Service receives high traffic and Pods are overloaded.
+
+Short term:
+- Increase replicas.
+- Verify HPA.
+- Check CPU/memory limits.
+- Check downstream bottlenecks.
+
+Long term:
+- Optimize application.
+- Optimize DB/Redis.
+- Add caching where appropriate.
+- Use asynchronous processing where suitable.
+- Scale infrastructure.
+
+
+28. EKS worker node goes down.
+
+Worker Node DOWN
+       ↓
+Pods on node unavailable
+       ↓
+Kubernetes detects failure
+       ↓
+Replacement Pods scheduled
+       ↓
+Healthy nodes
+
+Requires:
+- Healthy nodes with capacity.
+- Deployment with desired replicas.
+- Scheduling constraints allowing replacement.
+
+For HA:
+- Spread Pods across nodes/AZs.
+
+
+29. New Sync-Service deployment fails. How rollback?
+
+Check deployment:
+
+kubectl rollout status deployment/sync-service
+
+Check history:
+
+kubectl rollout history deployment/sync-service
+
+Rollback:
+
+kubectl rollout undo deployment/sync-service
+
+Verify:
+
+kubectl rollout status deployment/sync-service
+
+Then investigate:
+- Image issue.
+- Configuration.
+- Readiness probe.
+- Application startup.
+- Resource limits.
+- Dependency connectivity.
+
+
+30. Design APM on EC2 + Sync-Service on EKS for HA.
+
+                 Internet
+                    |
+             Load Balancer
+                /       \
+             EC2-A     EC2-B
+              APM       APM
+                \       /
+                 Sync-Service
+                      |
+                 EKS Service
+                      |
+               +------+------+ 
+               |      |      |
+              Pod    Pod    Pod
+               |      |      |
+               +------+------+ 
+                      |
+                Redis / DB
+
+
+APM:
+- Multiple EC2s.
+- Multiple AZs.
+- Load Balancer.
+- Auto Scaling Group.
+- Health checks.
+
+Sync-Service:
+- Multiple Pods.
+- Multiple nodes/AZs.
+- HPA.
+- Cluster Autoscaler/Karpenter.
+- Rolling deployment.
+- Readiness/Liveness probes.
+
+Security:
+- Security Groups.
+- Private subnets where appropriate.
+- IAM Roles.
+- Secrets Manager/Parameter Store.
+
+Monitoring:
+- CloudWatch.
+- Application metrics/logs.
+- Prometheus/Grafana where applicable.
