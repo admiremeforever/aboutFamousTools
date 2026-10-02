@@ -1096,3 +1096,30 @@ kubectl describe pod <pod>
 kubectl logs <pod>
 kubectl logs <pod> --previous
 kubectl get events
+
+
+
+====================================
+shortcut Revision 
+
+1. Pod vs Deployment vs ReplicaSet
+2. ClusterIP vs NodePort vs LoadBalancer
+3. Ingress
+4. Service Discovery
+5. Readiness vs Liveness
+6. Rolling Deployment + Rollback
+7. CrashLoopBackOff
+8. ImagePullBackOff
+9. Pending Pod
+10. OOMKilled
+11. Requests vs Limits
+12. HPA
+13. HPA vs Cluster Autoscaler
+14. Pod networking
+15. ConfigMap vs Secret
+16. PV vs PVC
+17. Control Plane components
+18. Worker Node failure
+19. Zero-downtime deployment
+20. Kubernetes troubleshooting
+21. HA architecture
