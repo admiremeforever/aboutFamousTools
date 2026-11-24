@@ -1063,3 +1063,9 @@ How?  → Proxy/AOP
 Why?  → Atomicity/consistency
 What if? → Rollback, propagation, timeout, deadlock
 ```
+
+
+------------
+1)how SpringBoot is better then Servlet 
+2)Why and why not we should serelize a DTO
+
